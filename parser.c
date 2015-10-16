@@ -28,6 +28,8 @@ void add_history(char* unused) {}
 int main(void)
 {
     /* Create Some Parsers */
+    mpc_parser_t* Int       = mpc_new("int");
+    mpc_parser_t* Float     = mpc_new("float");
     mpc_parser_t* Number    = mpc_new("number");
     mpc_parser_t* Toperator = mpc_new("toperator");
     mpc_parser_t* Operator  = mpc_new("operator");
@@ -37,13 +39,15 @@ int main(void)
     /* Define them with the following Language */
     mpca_lang(MPCA_LANG_DEFAULT,
             "                                                                    \
-            number        : /-?[0-9]+/ ;                                         \
+            int           : /[0-9]/ ;                                            \
+            float         : <int>*'.'<int>+ ;                                    \
+            number        : /-?/<int>+ | <float>+;                               \
             toperator     : /add/ | /sub/ | /mul/ | /div/ ;                      \
             operator      : '+' | '-' | '*' | '/' | '%' | <toperator> ;          \
             expr          : <number> | '(' <operator> <expr>+ ')' ;              \
             lispy         : /^/ <operator> <expr>+ /$/ ;                         \
             ",
-            Number, Toperator, Operator, Expr, Lispy);
+            Int, Float, Number, Toperator, Operator, Expr, Lispy);
 
     puts("Lispy REPL");
     puts("Press Ctrl+c to Exit\n");
@@ -73,6 +77,6 @@ int main(void)
     }
 
     /* Undefine and delete our parsers */
-    mpc_cleanup(5, Number, Toperator, Operator, Expr, Lispy);
+    mpc_cleanup(7, Int, Float, Number, Toperator, Operator, Expr, Lispy);
     return 0;
 }
