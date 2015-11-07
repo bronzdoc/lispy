@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "mpc/mpc.h"
 
 #ifdef _WIN32
@@ -114,10 +115,14 @@ long eval_op(long x, char* op, long y)
     if (strcmp(op, "-") == 0) return x - y;
     if (strcmp(op, "*") == 0) return x * y;
     if (strcmp(op, "/") == 0) return x / y;
+    if (strcmp(op, "%") == 0) return x % y;
     if (strcmp(op, "add") == 0) return x + y;
     if (strcmp(op, "sub") == 0) return x - y;
     if (strcmp(op, "mul") == 0) return x * y;
     if (strcmp(op, "div") == 0) return x / y;
+    if (strcmp(op, "mod") == 0) return x % y;
 
     return 0;
 }
+
+
