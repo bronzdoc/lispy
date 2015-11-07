@@ -48,8 +48,8 @@ int main(void)
             int           : /[0-9]+/ ;                                           \
             float         : <signed>+'.'<int>+ ;                                 \
             number        : <signed> | <float> ;                                 \
-            toperator     : /add/ | /sub/ | /mul/ | /div/ ;                      \
-            operator      : '+' | '-' | '*' | '/' | '%' | <toperator> ;          \
+            toperator     : /add/ | /sub/ | /mul/ | /div/ | /mod/ | /pow/ ;      \
+            operator      : '+' | '-' | '*' | '/' | '%' | '^' | <toperator> ;    \
             expr          : <number> | '(' <operator> <expr>+ ')' ;              \
             lispy         : /^/ <operator> <expr>+ /$/ ;                         \
             ",
@@ -116,11 +116,13 @@ long eval_op(long x, char* op, long y)
     if (strcmp(op, "*") == 0) return x * y;
     if (strcmp(op, "/") == 0) return x / y;
     if (strcmp(op, "%") == 0) return x % y;
+    if (strcmp(op, "^") == 0) return pow((double) x, y);
     if (strcmp(op, "add") == 0) return x + y;
     if (strcmp(op, "sub") == 0) return x - y;
     if (strcmp(op, "mul") == 0) return x * y;
     if (strcmp(op, "div") == 0) return x / y;
     if (strcmp(op, "mod") == 0) return x % y;
+    if (strcmp(op, "pow") == 0) return pow(x, y);
 
     return 0;
 }
