@@ -25,17 +25,18 @@ void add_history(char* unused) {}
 #include <editline/readline.h>
 #include <editline/history.h>
 #endif
-
-long eval(mpc_ast_t*);
-long eval_op(long, char*, long);
-
 /* lval => lisp value */
-typedef struct lval {
+typedef struct {
     int type;
     long num;
     int err;
-
 } lval;
+
+lval eval(mpc_ast_t*);
+lval eval_op(lval, char*, lval);
+lval lval_num(long);
+lval lval_err(int);
+void lval_println(lval);
 
 /* Create Enumeration of Possible lval Types */
 enum { LVAL_NUM, LVAL_ERR };
@@ -84,10 +85,9 @@ int main(void)
         mpc_result_t r;
         if (mpc_parse("<stdin>", input, Lispy, &r)) {
             /* On Success Print the AST */
-            long result = eval(r.output);
-            printf("%li\n", result);
-            //mpc_ast_print(r.output);
-            //mpc_ast_delete(r.output);
+            lval result = eval(r.output);
+            lval_println(result);
+            mpc_ast_delete(r.output);
         } else {
             /* Otherwise Print the Error */
             mpc_err_print(r.error);
@@ -102,17 +102,20 @@ int main(void)
     return 0;
 }
 
-long eval(mpc_ast_t* t)
+lval eval(mpc_ast_t* t)
 {
     /* If tagged as number return it directly. */
-    if (strstr(t->tag, "number"))
-        return atoi(t->contents);
+    if (strstr(t->tag, "number")) {
+        errno = 0;
+        long x = strtol(t->contents, NULL, 10);
+        return errno == ERANGE ? lval_err(LERR_BAD_NUM) : lval_num(x);
+    }
 
     /* The operator is always second child. */
     char* op = t->children[1]->contents;
 
     /* Store the third child in x */
-    long x = eval(t->children[2]);
+    lval x = eval(t->children[2]);
 
     int i = 3;
     while (strstr(t->children[i]->tag, "expr")) {
@@ -149,7 +152,7 @@ lval eval_op(lval x, char* op, lval y)
     if (strcmp(op, "^") == 0 || strcmp(op, "pow") == 0)
         return lval_num(pow((double) x.num, y.num));
 
-    return 0;
+    return lval_err(LERR_BAD_OP);
 }
 
 /* Create a new number type lval */
@@ -170,24 +173,24 @@ lval lval_err(int x) {
 }
 
 /* Print an "lval" */
-void lval_print(lval v) {
+void lval_println(lval v) {
     switch (v.type) {
         /* In the case the type is a number print it */
         /* Then 'break' out of the switch. */
         case LVAL_NUM:
-            printf("%li", v.num); break;
+            printf("%li\n", v.num); break;
 
         /* In the case the type is an error */
         case LVAL_ERR:
             /* Check what type of error it is and print it */
             if (v.err == LERR_DIV_ZERO)
-                printf("Error: Division By Zero!");
+                printf("Error: Division By Zero!\n");
 
             if (v.err == LERR_BAD_OP)
-                printf("Error: Invalid Operator!");
+                printf("Error: Invalid Operator!\n");
 
             if (v.err == LERR_BAD_NUM)
-                printf("Error: Invalid Number!");
+                printf("Error: Invalid Number!\n");
 
             break;
     }
