@@ -61,8 +61,8 @@ int main(void)
             "                                                                    \
             signed        : /-?[0-9]+/ ;                                         \
             int           : /[0-9]+/ ;                                           \
-            float         : <signed>+'.'<int>+ ;                                 \
-            number        : <signed> | <float> ;                                 \
+            float         : /-?[0-9]+\\.[0-9]+/ ;                                \
+            number        : <float> | <int> | <signed> ;                         \
             toperator     : /add/ | /sub/ | /mul/ | /div/ | /mod/ | /pow/ ;      \
             operator      : '+' | '-' | '*' | '/' | '%' | '^' | <toperator> ;    \
             expr          : <number> | '(' <operator> <expr>+ ')' ;              \
