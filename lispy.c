@@ -44,7 +44,7 @@ enum { LVAL_NUM, LVAL_ERR };
 /* Create Enumeration of Possible Error Types */
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
-int main(void)
+int main(int argc, char** argv)
 {
     /* Create Some Parsers */
     mpc_parser_t* Signed    = mpc_new("signed");
@@ -84,10 +84,16 @@ int main(void)
         /* Attempt to Parse the user Input */
         mpc_result_t r;
         if (mpc_parse("<stdin>", input, Lispy, &r)) {
-            /* On Success Print the AST */
-            lval result = eval(r.output);
-            lval_println(result);
-            mpc_ast_delete(r.output);
+            if (argc > 1 && strcmp(argv[1], "--ast") == 0) {
+                /* On Success Print the AST */
+                mpc_ast_print(r.output);
+                mpc_ast_delete(r.output);
+            } else {
+                /* Eval the input */
+                lval result = eval(r.output);
+                lval_println(result);
+                mpc_ast_delete(r.output);
+            }
         } else {
             /* Otherwise Print the Error */
             mpc_err_print(r.error);
